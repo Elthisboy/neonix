@@ -7,11 +7,13 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
 import org.jetbrains.annotations.NotNull;
+import com.elthisboy.neonix.init.*;
+
 
 import java.util.concurrent.CompletableFuture;
 
 public class NeoNixLanguageProvider extends FabricLanguageProvider {
-    protected NeoNixLanguageProvider(FabricDataOutput dataOutput, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
+    public NeoNixLanguageProvider(FabricDataOutput dataOutput, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
         super(dataOutput, registryLookup);
     }
 
@@ -25,6 +27,12 @@ public class NeoNixLanguageProvider extends FabricLanguageProvider {
 
     @Override
     public void generateTranslations(RegistryWrapper.WrapperLookup wrapperLookup, TranslationBuilder translationBuilder) {
+
+        addText(translationBuilder, ItemGroupInit.NEO_NIX_TEXT, "Neo-Nix Mod");
+
+
+        //.................................................ITEMS................................................
+        translationBuilder.add(ItemInit.HOLO_PICK,"Holo-Pick");
 
     }
 }

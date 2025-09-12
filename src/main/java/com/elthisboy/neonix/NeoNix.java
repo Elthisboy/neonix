@@ -1,5 +1,6 @@
 package com.elthisboy.neonix;
 
+import com.elthisboy.neonix.init.ModDataComponents;
 import net.fabricmc.api.ModInitializer;
 import com.elthisboy.neonix.init.*;
 import net.minecraft.util.Identifier;
@@ -14,9 +15,11 @@ public class NeoNix implements ModInitializer {
 	public void onInitialize() {
 		LOGGER.info("Loading...");
 
+		ModDataComponents.init();
 		ItemInit.load();
 		BlockInit.load();
 		ItemGroupInit.load();
+
 
 
 		LOGGER.info("Hello Fabric world!");

@@ -9,17 +9,17 @@ import net.minecraft.registry.tag.TagKey;
 
 public class NeoHoloNixModToolMaterials implements ToolMaterial {
 
-    PINK_GARNET(TagList.Blocks.INCORRECT_FOR_EXAMPLE_TOOL,
-            1200, 5.0F, 4.0F, 22, () -> Ingredient.ofItems(ItemInit.EXAMPLE_ITEM));
+   //PINK_GARNET(TagList.Blocks.INCORRECT_FOR_EXAMPLE_TOOL,
+   //        1200, 5.0F, 4.0F, 22, () -> Ingredient.ofItems(ItemInit.EXAMPLE_ITEM));
 
-    void EXAMPLE(
-            3430,
-                    12.0f,
-                    5.0f,
-            TagList.Blocks.INCORRECT_FOR_EXAMPLE_TOOL,
-            15,
-            Ingredient.ofItems(ItemInit.EXAMPLE_ITEM)
-    );
+   //void EXAMPLE(
+   //        3430,
+   //                12.0f,
+   //                5.0f,
+   //        TagList.Blocks.INCORRECT_FOR_EXAMPLE_TOOL,
+   //        15,
+   //        Ingredient.ofItems(ItemInit.EXAMPLE_ITEM)
+   //);
 
     private final int durability;
     private final float miningSpeedMultiplier, attackDamage;
