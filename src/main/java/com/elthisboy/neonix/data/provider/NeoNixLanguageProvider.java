@@ -39,11 +39,16 @@ public class NeoNixLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add("text.neonix.no_charge", "You don't have any HOLO_CHARGE.");
 
 
-
-
         translationBuilder.add(ItemInit.HOLO_AXE,"Holo-Axe");
-        translationBuilder.add(ItemInit.HOLO_SHOVEL,"Holo-Shovel");
+
         translationBuilder.add(ItemInit.HOLO_HOE,"Holo-Hoe");
+
+
+        translationBuilder.add(ItemInit.HOLO_SHOVEL,"Holo-Shovel");
+        translationBuilder.add("message.neonix.holoshovel.full", "Energy is already full (%s).");
+        translationBuilder.add("message.neonix.holoshovel.recharge", "Recharged +%s → Energy: %s/%s");
+        translationBuilder.add("message.neonix.holoshovel.nocharge", "You have no HOLO_CHARGE to recharge.");
+        translationBuilder.add("message.neonix.holoshovel.overclock", "§bOVERCLOCK activated: §e%s §fblocks free!");
 
         translationBuilder.add(ItemInit.HOLO_SWORD,"Holo-Sword");
         translationBuilder.add("message.neonix.holosword.overclock", "§cOVERCLOCK activado: %s golpes gratis!");

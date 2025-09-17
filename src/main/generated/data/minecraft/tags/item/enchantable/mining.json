@@ -1,5 +1,8 @@
 {
   "values": [
-    "neonix:holo_pickaxe"
+    "neonix:holo_pickaxe",
+    "neonix:holo_axe",
+    "neonix:holo_shovel",
+    "neonix:holo_hoe"
   ]
 }

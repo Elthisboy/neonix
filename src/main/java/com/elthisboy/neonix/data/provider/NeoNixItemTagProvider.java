@@ -43,7 +43,6 @@ public class NeoNixItemTagProvider extends FabricTagProvider<Item> {
         getOrCreateTagBuilder(ENCH_MINING).add(ItemInit.HOLO_HOE);
         getOrCreateTagBuilder(ENCH_DURABLE).add(ItemInit.HOLO_HOE);
 
-
         getOrCreateTagBuilder(ENCH_WEAPON).add(ItemInit.HOLO_SWORD);
         getOrCreateTagBuilder(ENCH_DURABLE).add(ItemInit.HOLO_SWORD);
 

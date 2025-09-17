@@ -1,4 +1,4 @@
-// 1.21.1	2025-09-17T03:07:51.0805653	Neo-Nix: HoloTools & CyberCapsule/Tags for minecraft:item
-b4df327bfd59df75197f5fa49ee52ffd17f2edb7 data\minecraft\tags\item\enchantable\durable.json
-408c3aa8a1486e0dc64c0254e7b32fbe39181d54 data\minecraft\tags\item\enchantable\mining.json
+// 1.21.1	2025-09-17T17:00:42.5686627	Neo-Nix: HoloTools & CyberCapsule/Tags for minecraft:item
+3295babcf63dfd003c7d2e39e0a4aa98f661b28f data\minecraft\tags\item\enchantable\durable.json
+bc775444c8d58cfdbc2bb0e5b631b67f4e306c13 data\minecraft\tags\item\enchantable\mining.json
 ef98818db3801edf83bd534d02827c111e810e52 data\minecraft\tags\item\enchantable\weapon.json
