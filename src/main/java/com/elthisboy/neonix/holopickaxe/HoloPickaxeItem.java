@@ -1,0 +1,201 @@
+package com.elthisboy.neonix.holopickaxe;
+
+import com.elthisboy.neonix.init.ItemInit;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.PickaxeItem;
+import net.minecraft.item.ToolMaterial;
+import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
+import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+
+public class HoloPickaxeItem extends PickaxeItem {
+    // Config final
+    private static final int CAPACITY = 1000;          // energía máx
+    private static final int COST_PER_BLOCK = 1;       // consumo por bloque
+    private static final int TRIGGER_BLOCKS = 500;     // cada 500 -> overclock
+    private static final int OC_FREE_BLOCKS = 50;      // bloques “gratis” sin gasto
+    private static final float OC_SPEED_MULT = 5.0f;   // multiplicador durante OC
+    private static final int BAR_COLOR = 0x00E5FF;     // cian
+
+    // Recargas por charge
+    private static final int RECHARGE_LV1 = 50;
+    private static final int RECHARGE_LV2 = 100;
+    private static final int RECHARGE_LV3 = 200;
+
+    public HoloPickaxeItem(ToolMaterial material, Settings settings) {
+        super(material, settings.maxCount(1)); // sin durabilidad vanilla
+    }
+
+    /* =======================
+       LÓGICA DE MINADO/ENERGÍA
+       ======================= */
+
+    @Override
+    public float getMiningSpeed(ItemStack stack, BlockState state) {
+        int energy = ItemInit.ModDataComponents.getEnergy(stack);
+        int ocLeft = ItemInit.ModDataComponents.getOverclockLeft(stack);
+        float base = super.getMiningSpeed(stack, state);
+        if (ocLeft > 0) return base * OC_SPEED_MULT;
+        if (energy <= 0) return 0.3f;
+        return base;
+    }
+
+    @Override
+    public boolean canMine(BlockState state, World world, BlockPos pos, PlayerEntity miner) {
+        if (miner.getAbilities().creativeMode) return true;
+        ItemStack stack = miner.getMainHandStack();
+        int energy = ItemInit.ModDataComponents.getEnergy(stack);
+        int ocLeft = ItemInit.ModDataComponents.getOverclockLeft(stack);
+        if (energy <= 0 && ocLeft <= 0) return false;
+        return super.canMine(state, world, pos, miner);
+    }
+
+    // SIN llamar a super.postMine -> nunca gasta durabilidad
+    @Override
+    public boolean postMine(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner) {
+        if (!world.isClient) {
+            if (!stack.contains(ItemInit.ModDataComponents.ENERGY))         ItemInit.ModDataComponents.setEnergy(stack, CAPACITY);
+            if (!stack.contains(ItemInit.ModDataComponents.MINED_COUNT))    ItemInit.ModDataComponents.setMined(stack, 0);
+            if (!stack.contains(ItemInit.ModDataComponents.OVERCLOCK_LEFT)) ItemInit.ModDataComponents.setOverclockLeft(stack, 0);
+
+            int energy = ItemInit.ModDataComponents.getEnergy(stack);
+            int mined  = ItemInit.ModDataComponents.getMined(stack);
+            int ocLeft = ItemInit.ModDataComponents.getOverclockLeft(stack);
+
+            boolean shouldCountAndConsume = !state.isAir() && state.getHardness(world, pos) > 0.0F;
+            if (shouldCountAndConsume) {
+                if (ocLeft > 0) {
+                    ocLeft = Math.max(0, ocLeft - 1); // bloques gratis en OC
+                } else {
+                    if (energy > 0) energy = Math.max(0, energy - COST_PER_BLOCK);
+                    mined += 1;
+                    if (mined >= TRIGGER_BLOCKS && miner instanceof PlayerEntity p) {
+                        mined = 0;
+                        ocLeft = OC_FREE_BLOCKS;
+                        if (p instanceof ServerPlayerEntity sp) {
+                            // text.neonix.overclock_on: "%s free blocks"
+                            sp.sendMessage(Text.translatable("text.neonix.overclock_on", OC_FREE_BLOCKS), true);
+                        }
+                    }
+                }
+            }
+
+            ItemInit.ModDataComponents.setEnergy(stack, energy);
+            ItemInit.ModDataComponents.setMined(stack,  mined);
+            ItemInit.ModDataComponents.setOverclockLeft(stack, ocLeft);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        return true; // no durabilidad por hits
+    }
+
+    /* =======================
+       RECARGA CON HOLO_CHARGE
+       ======================= */
+    @Override
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
+        if (world.isClient) return TypedActionResult.pass(stack);
+
+        // Si ya está lleno no consumas nada
+        if (ItemInit.ModDataComponents.getEnergy(stack) >= CAPACITY) {
+            if (user instanceof ServerPlayerEntity sp) {
+                // text.neonix.energy_max: "Energy is already full (%s)."
+                sp.sendMessage(Text.translatable("text.neonix.energy_max", CAPACITY), true);
+            }
+            return TypedActionResult.pass(stack);
+        }
+
+        // Shift + Click derecho para recargar con HOLO_CHARGE
+        if (user.isSneaking()) {
+            int added = tryConsumeChargeAndRecharge(user, stack);
+            if (added > 0) {
+                if (user instanceof ServerPlayerEntity sp) {
+                    int energy = ItemInit.ModDataComponents.getEnergy(stack);
+                    // text.neonix.recharge: "Recharge +%s → Energy: %s/%s"
+                    sp.sendMessage(Text.translatable("text.neonix.recharge", added, energy, CAPACITY), true);
+                }
+                return TypedActionResult.success(stack, false);
+            } else {
+                if (user instanceof ServerPlayerEntity sp) {
+                    // text.neonix.no_charge: "You don't have any HOLO_CHARGE."
+                    sp.sendMessage(Text.translatable("text.neonix.no_charge"), true);
+                }
+                return TypedActionResult.pass(stack);
+            }
+        }
+        return TypedActionResult.pass(stack);
+    }
+
+    private int tryConsumeChargeAndRecharge(PlayerEntity player, ItemStack pick) {
+        int current = ItemInit.ModDataComponents.getEnergy(pick);
+        if (current >= CAPACITY) return 0; // seguridad extra
+
+        int add = 0;
+        if (consumeOne(player, ItemInit.HOLO_CHARGE_LV3)) add = RECHARGE_LV3;
+        else if (consumeOne(player, ItemInit.HOLO_CHARGE_LV2)) add = RECHARGE_LV2;
+        else if (consumeOne(player, ItemInit.HOLO_CHARGE_LV1)) add = RECHARGE_LV1;
+
+        if (add > 0) {
+            int room = CAPACITY - current;     // cuánto falta para el tope
+            int realAdd = Math.min(room, add); // no pasar del tope
+            ItemInit.ModDataComponents.setEnergy(pick, current + realAdd);
+            return realAdd;                     // devolvemos lo realmente cargado
+        }
+        return 0;
+    }
+
+    private boolean consumeOne(PlayerEntity player, Item item) {
+        // 1) offhand
+        ItemStack off = player.getOffHandStack();
+        if (!off.isEmpty() && off.isOf(item)) {
+            off.decrement(1);
+            return true;
+        }
+        // 2) inventario (incluye hotbar)
+        var inv = player.getInventory();
+        for (int i = 0; i < inv.size(); i++) {
+            ItemStack s = inv.getStack(i);
+            if (!s.isEmpty() && s.isOf(item)) {
+                s.decrement(1);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /* =======================
+       BARRA DEL ÍTEM = ENERGÍA
+       ======================= */
+
+    @Override public boolean isItemBarVisible(ItemStack stack) { return true; }
+
+    @Override
+    public int getItemBarStep(ItemStack stack) {
+        int energy = ItemInit.ModDataComponents.getEnergy(stack);
+        return Math.round(13f * Math.min(1f, Math.max(0f, energy / (float) CAPACITY)));
+    }
+
+    @Override public int getItemBarColor(ItemStack stack) { return BAR_COLOR; }
+
+    // Encantable en mesa/yunque como un pico
+    @Override
+    public boolean isEnchantable(ItemStack stack) {
+        return stack.getCount() == 1;
+    }
+
+    @Override
+    public int getEnchantability() {
+        return 10; // valor tipo diamante
+    }
+}

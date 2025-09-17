@@ -1,4 +1,19 @@
 {
-  "item.neonix.holo_pick": "Holo-Pick",
-  "itemGroup.neonix.titleGroup": "Neo-Nix Mod"
+  "item.neonix.holo_axe": "Holo-Axe",
+  "item.neonix.holo_charge_lv1": "Holo-Charge lv1",
+  "item.neonix.holo_charge_lv2": "Holo-Charge lv2",
+  "item.neonix.holo_charge_lv3": "Holo-Charge lv3",
+  "item.neonix.holo_hoe": "Holo-Hoe",
+  "item.neonix.holo_pickaxe": "Holo-Pickaxe",
+  "item.neonix.holo_shovel": "Holo-Shovel",
+  "item.neonix.holo_sword": "Holo-Sword",
+  "itemGroup.neonix.titleGroup": "Neo-Nix Mod",
+  "message.neonix.holosword.full": "Energía al máximo (%s).",
+  "message.neonix.holosword.nocharge": "No tienes HOLO_CHARGE para recargar.",
+  "message.neonix.holosword.overclock": "§cOVERCLOCK activado: %s golpes gratis!",
+  "message.neonix.holosword.recharge": "Recarga +%s → Energía: %s/%s",
+  "text.neonix.energy_max": "Energy is already full (%s).",
+  "text.neonix.no_charge": "You don't have any HOLO_CHARGE.",
+  "text.neonix.overclock_on": "§bOVERCLOCK §factivated: §e%s §ffree blocks",
+  "text.neonix.recharge": "Recharge +%s → Energy: %s/%s"
 }

@@ -31,8 +31,30 @@ public class NeoNixLanguageProvider extends FabricLanguageProvider {
         addText(translationBuilder, ItemGroupInit.NEO_NIX_TEXT, "Neo-Nix Mod");
 
 
+        //.................................................TOOLS................................................
+        translationBuilder.add(ItemInit.HOLO_PICKAXE,"Holo-Pickaxe");
+        translationBuilder.add("text.neonix.overclock_on", "§bOVERCLOCK §factivated: §e%s §ffree blocks");
+        translationBuilder.add("text.neonix.recharge", "Recharge +%s → Energy: %s/%s");
+        translationBuilder.add("text.neonix.energy_max", "Energy is already full (%s).");
+        translationBuilder.add("text.neonix.no_charge", "You don't have any HOLO_CHARGE.");
+
+
+
+
+        translationBuilder.add(ItemInit.HOLO_AXE,"Holo-Axe");
+        translationBuilder.add(ItemInit.HOLO_SHOVEL,"Holo-Shovel");
+        translationBuilder.add(ItemInit.HOLO_HOE,"Holo-Hoe");
+
+        translationBuilder.add(ItemInit.HOLO_SWORD,"Holo-Sword");
+        translationBuilder.add("message.neonix.holosword.overclock", "§cOVERCLOCK activado: %s golpes gratis!");
+        translationBuilder.add("message.neonix.holosword.full", "Energía al máximo (%s).");
+        translationBuilder.add("message.neonix.holosword.recharge", "Recarga +%s → Energía: %s/%s");
+        translationBuilder.add("message.neonix.holosword.nocharge", "No tienes HOLO_CHARGE para recargar.");
+
         //.................................................ITEMS................................................
-        translationBuilder.add(ItemInit.HOLO_PICK,"Holo-Pick");
+        translationBuilder.add(ItemInit.HOLO_CHARGE_LV1,"Holo-Charge lv1");
+        translationBuilder.add(ItemInit.HOLO_CHARGE_LV2,"Holo-Charge lv2");
+        translationBuilder.add(ItemInit.HOLO_CHARGE_LV3,"Holo-Charge lv3");
 
     }
 }
