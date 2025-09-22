@@ -197,18 +197,38 @@ public class HoloSwordItem extends SwordItem {
     }
 
     /* =======================
-       BARRA / ENCANTABLE
+       BARRA
        ======================= */
-    @Override public boolean isItemBarVisible(ItemStack stack) { return true; }
+
+    private static int energyBarStep(int energy, int capacity) {
+        int step = Math.round(13f * Math.min(1f, Math.max(0f, energy / (float) capacity)));
+        return Math.max(1, step);
+    }
+
+    @Override
+    public boolean isItemBarVisible(ItemStack stack) {
+        return true;
+    }
 
     @Override
     public int getItemBarStep(ItemStack stack) {
-        int energy = ItemInit.ModDataComponents.getEnergy(stack);
-        return Math.round(13f * Math.min(1f, Math.max(0f, energy / (float) CAPACITY)));
+        int energy = ItemInit.ModDataComponents.getEnergy(stack); // o tu ModDataComponents según el item
+        return energyBarStep(energy, CAPACITY);
     }
 
-    @Override public int getItemBarColor(ItemStack stack) { return BAR_COLOR; }
+    @Override
+    public int getItemBarColor(ItemStack stack) {
+        return BAR_COLOR;
+    }
 
-    @Override public boolean isEnchantable(ItemStack stack) { return stack.getCount() == 1; }
-    @Override public int getEnchantability() { return 12; } // cercano a diamante
+    /* =======================
+       ENCANTABLE
+       ======================= */
+    @Override public boolean isEnchantable(ItemStack stack) {
+        return stack.getCount() == 1;
+    }
+
+    @Override public int getEnchantability() {
+        return 12;
+    }
 }

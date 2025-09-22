@@ -2,6 +2,7 @@ package com.elthisboy.neonix.holohoe;
 
 import com.elthisboy.neonix.init.ItemInit;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.HoeItem;
@@ -29,7 +30,7 @@ public class HoloHoeItem extends HoeItem {
     private static final int TRIGGER_BLOCKS = 500;   // cada 500 -> overclock
     private static final int OC_FREE_BLOCKS = 50;    // bloques “gratis” en OC
     private static final float OC_SPEED_MULT = 5.0f; // multiplicador (si se usa)
-    private static final int BAR_COLOR = 0x00E5FF;   // cian
+    private static final int BAR_COLOR = 0x73F229;   // cian
 
     // Recargas por charge
     private static final int RECHARGE_LV1 = 50;
@@ -41,14 +42,16 @@ public class HoloHoeItem extends HoeItem {
         super(material, settings.maxCount(1));
     }
 
-    /* =======================
-       Helpers de inicialización (SEGURO: no utiliza getNbt()/hasNbt())
-       ======================= */
+    @Override
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (!world.isClient) {
+            if (!stack.contains(ItemInit.ModDataComponents.ENERGY))         ItemInit.ModDataComponents.setEnergy(stack, 0);
+            if (!stack.contains(ItemInit.ModDataComponents.MINED_COUNT))    ItemInit.ModDataComponents.setMined(stack, 0);
+            if (!stack.contains(ItemInit.ModDataComponents.OVERCLOCK_LEFT)) ItemInit.ModDataComponents.setOverclockLeft(stack, 0);
+        }
+        super.inventoryTick(stack, world, entity, slot, selected);
+    }
 
-    /**
-     * Inicializa componentes defensivamente sin crear o consultar NBT directo.
-     * Si falta ENERGY se inicializa a 0 (no a CAPACITY) para evitar rellenos mágicos.
-     */
     private void ensureComponentsInitialized(ItemStack stack) {
         if (!stack.contains(ItemInit.ModDataComponents.ENERGY)) {
             // <<--- cambiado: POR SEGURIDAD inicializamos a 0 (no CAPACITY)

@@ -2,6 +2,7 @@ package com.elthisboy.neonix.holopickaxe;
 
 import com.elthisboy.neonix.init.ItemInit;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -33,9 +34,15 @@ public class HoloPickaxeItem extends PickaxeItem {
         super(material, settings.maxCount(1)); // sin durabilidad vanilla
     }
 
-    /* =======================
-       LÓGICA DE MINADO/ENERGÍA
-       ======================= */
+    @Override
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (!world.isClient) {
+            if (!stack.contains(ItemInit.ModDataComponents.ENERGY))         ItemInit.ModDataComponents.setEnergy(stack, 0);
+            if (!stack.contains(ItemInit.ModDataComponents.MINED_COUNT))    ItemInit.ModDataComponents.setMined(stack, 0);
+            if (!stack.contains(ItemInit.ModDataComponents.OVERCLOCK_LEFT)) ItemInit.ModDataComponents.setOverclockLeft(stack, 0);
+        }
+        super.inventoryTick(stack, world, entity, slot, selected);
+    }
 
     @Override
     public float getMiningSpeed(ItemStack stack, BlockState state) {
