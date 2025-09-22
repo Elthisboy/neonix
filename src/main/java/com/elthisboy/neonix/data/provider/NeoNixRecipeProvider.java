@@ -22,14 +22,9 @@ public class NeoNixRecipeProvider extends FabricRecipeProvider {
     @Override
     public void generate(RecipeExporter recipeExporter) {
 
-        /* ==========================
-           HOLO CHARGES (energía)
-           ========================== */
 
-        // Lv1 (barato): vertical 1x2
-        // R
-        // Q
-        // R = Redstone, Q = Nether Quartz
+
+        // Lv1:
         ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, ItemInit.HOLO_CHARGE_LV1, 1)
                 .pattern("R")
                 .pattern("Q")
@@ -38,11 +33,7 @@ public class NeoNixRecipeProvider extends FabricRecipeProvider {
                 .criterion("has_redstone", conditionsFromItem(Items.REDSTONE))
                 .offerTo(recipeExporter);
 
-        // Lv2: 4x Lv1 en las esquinas + redstone block al centro
-        // C C
-        //  B
-        // C C
-        // C = Lv1, B = Redstone Block
+        // Lv2:
         ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, ItemInit.HOLO_CHARGE_LV2, 1)
                 .pattern("C C")
                 .pattern(" B ")
@@ -52,11 +43,7 @@ public class NeoNixRecipeProvider extends FabricRecipeProvider {
                 .criterion("has_lv1", conditionsFromItem(ItemInit.HOLO_CHARGE_LV1))
                 .offerTo(recipeExporter);
 
-        // Lv3: 2x Lv2 arriba, redstone block centro, diamond abajo
-        // C C
-        //  B
-        //  D
-        // C = Lv2, B = Redstone Block, D = Diamond
+        // Lv3:
         ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, ItemInit.HOLO_CHARGE_LV3, 1)
                 .pattern("C C")
                 .pattern(" B ")
@@ -68,45 +55,32 @@ public class NeoNixRecipeProvider extends FabricRecipeProvider {
                 .offerTo(recipeExporter);
 
 
-        /* ======================================
-           “Upgrade” de herramientas a HOLO
-           (consume la herramienta de diamante)
-           ====================================== */
 
         // HOLO_PICKAXE:
-        // C P C
-        //  C
-        // C = Lv2, P = Diamond Pickaxe
         ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, ItemInit.HOLO_PICKAXE, 1)
-                .pattern("CPC")
+                .pattern("CBC")
+                .pattern(" P ")
                 .pattern(" C ")
-                .pattern("   ")
                 .input('C', ItemInit.HOLO_CHARGE_LV2)
                 .input('P', Items.DIAMOND_PICKAXE)
+                .input('B', Items.REDSTONE_BLOCK)
                 .criterion("has_diamond_pickaxe", conditionsFromItem(Items.DIAMOND_PICKAXE))
                 .offerTo(recipeExporter);
 
         // HOLO_SHOVEL:
-        //  C
-        //  S
-        // C = Lv2, S = Diamond Shovel
         ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, ItemInit.HOLO_SHOVEL, 1)
                 .pattern(" C ")
                 .pattern(" S ")
-                .pattern("   ")
+                .pattern(" C ")
                 .input('C', ItemInit.HOLO_CHARGE_LV2)
                 .input('S', Items.DIAMOND_SHOVEL)
                 .criterion("has_diamond_shovel", conditionsFromItem(Items.DIAMOND_SHOVEL))
                 .offerTo(recipeExporter);
 
         // HOLO_AXE:
-        // A C
-        // A
-        //  C
-        // A = Diamond Axe, C = Lv2
         ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, ItemInit.HOLO_AXE, 1)
-                .pattern("AC ")
-                .pattern("A  ")
+                .pattern(" C ")
+                .pattern(" A ")
                 .pattern(" C ")
                 .input('A', Items.DIAMOND_AXE)
                 .input('C', ItemInit.HOLO_CHARGE_LV2)
@@ -114,29 +88,23 @@ public class NeoNixRecipeProvider extends FabricRecipeProvider {
                 .offerTo(recipeExporter);
 
         // HOLO_HOE:
-        //  C
-        //  H
-        // C = Lv2, H = Diamond Hoe
         ShapedRecipeJsonBuilder.create(RecipeCategory.TOOLS, ItemInit.HOLO_HOE, 1)
                 .pattern(" C ")
                 .pattern(" H ")
-                .pattern("   ")
+                .pattern(" C ")
                 .input('C', ItemInit.HOLO_CHARGE_LV2)
                 .input('H', Items.DIAMOND_HOE)
                 .criterion("has_diamond_hoe", conditionsFromItem(Items.DIAMOND_HOE))
                 .offerTo(recipeExporter);
 
         // HOLO_SWORD:
-        // C C
-        //  S
-        //  C
-        // C = Lv2, S = Diamond Sword
         ShapedRecipeJsonBuilder.create(RecipeCategory.COMBAT, ItemInit.HOLO_SWORD, 1)
-                .pattern("C C")
-                .pattern(" S ")
+                .pattern("CBC")
                 .pattern(" C ")
+                .pattern(" S ")
                 .input('C', ItemInit.HOLO_CHARGE_LV2)
                 .input('S', Items.DIAMOND_SWORD)
+                .input('B', Items.REDSTONE_BLOCK)
                 .criterion("has_diamond_sword", conditionsFromItem(Items.DIAMOND_SWORD))
                 .offerTo(recipeExporter);
     }

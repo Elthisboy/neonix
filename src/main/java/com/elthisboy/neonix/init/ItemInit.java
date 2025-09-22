@@ -26,7 +26,7 @@ import net.minecraft.util.Identifier;
 
 public class ItemInit {
 
-    // Helper para no repetirnos
+    // Helper
     private static Item.Settings withLore(Item.Settings s, Text... lines) {
         return s.component(DataComponentTypes.LORE, new LoreComponent(java.util.List.of(lines)));
     }
@@ -148,13 +148,11 @@ public class ItemInit {
     }
 
     public static void load() {
-        // Asegura registrar los data components al arrancar el mod
         ModDataComponents.init();
     }
 
-    // =========================
+
     // Data Components compartidos
-    // =========================
     public static final class ModDataComponents {
         public static ComponentType<Integer> ENERGY;
         public static ComponentType<Integer> MINED_COUNT;     // progreso (o hits) hacia trigger

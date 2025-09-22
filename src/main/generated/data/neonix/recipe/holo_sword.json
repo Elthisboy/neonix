@@ -2,6 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
+    "B": {
+      "item": "minecraft:redstone_block"
+    },
     "C": {
       "item": "neonix:holo_charge_lv2"
     },
@@ -10,9 +13,9 @@
     }
   },
   "pattern": [
-    "C C",
-    " S ",
-    " C "
+    "CBC",
+    " C ",
+    " S "
   ],
   "result": {
     "count": 1,

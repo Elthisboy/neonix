@@ -1,17 +1,17 @@
-// 1.21.1	2025-09-22T00:28:23.7606153	Neo-Nix: HoloTools & CyberCapsule/Recipes
+// 1.21.1	2025-09-22T01:13:14.9423604	Neo-Nix: HoloTools/Recipes
 bd4040f1c0f5eb6bfa22cdeb8d2c4c2a652a656c data\neonix\recipe\holo_charge_lv3.json
-4379a1aef3d9e835c63ddd0c12352aae1205e49f data\neonix\recipe\holo_axe.json
-5472374504b8c137b27efd951b7d7a69b8a08166 data\neonix\recipe\holo_hoe.json
+ccbecdd00e2b13b512f1d0d0e61b0b33cfa1db3d data\neonix\recipe\holo_axe.json
+7a5490880be882baa2fd4214134448424e051e59 data\neonix\recipe\holo_hoe.json
 bc7d19558d8f52aa40e446edb3a26967c0e2a4a0 data\neonix\advancement\recipes\misc\holo_charge_lv1.json
-3e716b740fe0489f00f82aea2583102777f8fd63 data\neonix\recipe\holo_pickaxe.json
+5ca1a8354d16fcaf99f29887c45160f2aac46a90 data\neonix\recipe\holo_pickaxe.json
 3005b6c1b7bcfec47fbe1bf5dd7f2c1f10499deb data\neonix\advancement\recipes\tools\holo_pickaxe.json
 bb57a7fe6b6fe91dfbcf7b22f9edb38f2dcc17e1 data\neonix\recipe\holo_charge_lv2.json
 995075b26a47cdbd54a3502d6f523dd4ae877392 data\neonix\advancement\recipes\tools\holo_axe.json
 6bb83e8ac1abaa32814d268f4014387126fc640c data\neonix\advancement\recipes\tools\holo_hoe.json
-746b7c7a1085305b509278fe60fee2013560b431 data\neonix\recipe\holo_shovel.json
+f6431afef522039026e74951edc52834d6467d64 data\neonix\recipe\holo_shovel.json
 0d04e1d13d1cd74e4b4728fbf48931c9872b0e85 data\neonix\advancement\recipes\misc\holo_charge_lv3.json
 c6c778fecc762264cc7ba4133754189e207989a8 data\neonix\advancement\recipes\combat\holo_sword.json
 69de1594f99e1638854ae4d4c4874b0b60b71ca7 data\neonix\recipe\holo_charge_lv1.json
 9c55fcb73fbc1c8d1e0020be88b7d18e20ac6040 data\neonix\advancement\recipes\tools\holo_shovel.json
-750fc5813d0a8eb967ee505f9ced8d8b4a04d6fb data\neonix\recipe\holo_sword.json
+0d6dbc1a5109965ebe2250235fce0f60269be120 data\neonix\recipe\holo_sword.json
 11de56371821a45d37c86777bb7c12ce00119d47 data\neonix\advancement\recipes\misc\holo_charge_lv2.json

@@ -13,7 +13,6 @@ public class ItemGroupInit {
 
     public static final Text NEO_NIX_TEXT = Text.translatable("itemGroup."+ NeoNix.MOD_ID+ ".titleGroup");
 
-    // Definición del ItemGroup
     public static final ItemGroup NEO_NIX_GROUP = Registry.register(
             Registries.ITEM_GROUP,
             Identifier.of(NeoNix.MOD_ID, "neo_nix_group"),
