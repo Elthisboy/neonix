@@ -14,10 +14,16 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.util.ActionResult;
+import net.minecraft.item.ItemUsageContext;
 
+/**
+ * HoloShovelItem — no consume durabilidad vanilla, gasta ENERGÍA al minar o al arar (path),
+ * y usa useOnBlock para capturar el arado y consumir energía allí.
+ */
 public class HoloShovelItem extends ShovelItem {
     // Config (ajusta si quieres)
-    private static final int CAPACITY = 800;
+    private static final int CAPACITY = 1000;
     private static final int COST_PER_BLOCK = 1;
     private static final int TRIGGER_BLOCKS = 400;    // bloques hasta OC
     private static final int OC_FREE_BLOCKS = 40;     // bloques gratis en OC
@@ -26,17 +32,32 @@ public class HoloShovelItem extends ShovelItem {
 
     // Recargas por charge
     private static final int RECHARGE_LV1 = 50;
-    private static final int RECHARGE_LV2 = 100;
-    private static final int RECHARGE_LV3 = 200;
+    private static final int RECHARGE_LV2 = 125;
+    private static final int RECHARGE_LV3 = 250;
 
     public HoloShovelItem(ToolMaterial material, Settings settings) {
         super(material, settings.maxCount(1)); // sin durabilidad vanilla
     }
 
     /* =======================
-       LÓGICA DE MINADO / ENERGÍA
+       Helpers de inicialización (no usa getNbt/hasNbt)
        ======================= */
+    private void ensureComponentsInitialized(ItemStack stack) {
+        if (!stack.contains(ItemInit.ModDataComponents.ENERGY)) {
+            // seguridad: inicializamos a 0 (evita autorrelleno inesperado)
+            ItemInit.ModDataComponents.setEnergy(stack, 0);
+        }
+        if (!stack.contains(ItemInit.ModDataComponents.MINED_COUNT)) {
+            ItemInit.ModDataComponents.setMined(stack, 0);
+        }
+        if (!stack.contains(ItemInit.ModDataComponents.OVERCLOCK_LEFT)) {
+            ItemInit.ModDataComponents.setOverclockLeft(stack, 0);
+        }
+    }
 
+    /* =======================
+       VELOCIDAD / CHECKS
+       ======================= */
     @Override
     public float getMiningSpeed(ItemStack stack, BlockState state) {
         int energy = ItemInit.ModDataComponents.getEnergy(stack);
@@ -57,30 +78,25 @@ public class HoloShovelItem extends ShovelItem {
         return super.canMine(state, world, pos, miner);
     }
 
-    // SIN llamar a super.postMine -> no gasta durabilidad vanilla
+    /* =======================
+       POSTMINE (para minado normal) - no llamar a super => no durabilidad
+       ======================= */
     @Override
     public boolean postMine(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner) {
         if (!world.isClient) {
-            if (!stack.contains(ItemInit.ModDataComponents.ENERGY))         ItemInit.ModDataComponents.setEnergy(stack, CAPACITY);
-            if (!stack.contains(ItemInit.ModDataComponents.MINED_COUNT))    ItemInit.ModDataComponents.setMined(stack, 0);
-            if (!stack.contains(ItemInit.ModDataComponents.OVERCLOCK_LEFT)) ItemInit.ModDataComponents.setOverclockLeft(stack, 0);
+            ensureComponentsInitialized(stack);
 
             int energy = ItemInit.ModDataComponents.getEnergy(stack);
             int mined  = ItemInit.ModDataComponents.getMined(stack);
             int ocLeft = ItemInit.ModDataComponents.getOverclockLeft(stack);
 
-            // criterio vanilla-like: solo contar/consumir si no es aire y hardness>0
             boolean shouldCountAndConsume = !state.isAir() && state.getHardness(world, pos) > 0.0F;
             if (shouldCountAndConsume) {
                 if (ocLeft > 0) {
-                    // Overclock activo: consume bloque gratis, no suma progreso
                     ocLeft = Math.max(0, ocLeft - 1);
                 } else {
-                    // Sin overclock: gasta energía y suma progreso
                     if (energy > 0) energy = Math.max(0, energy - COST_PER_BLOCK);
                     mined += 1;
-
-                    // activar overclock al llegar al umbral
                     if (mined >= TRIGGER_BLOCKS && miner instanceof PlayerEntity p) {
                         mined = 0;
                         ocLeft = OC_FREE_BLOCKS;
@@ -95,12 +111,77 @@ public class HoloShovelItem extends ShovelItem {
             ItemInit.ModDataComponents.setMined(stack, mined);
             ItemInit.ModDataComponents.setOverclockLeft(stack, ocLeft);
         }
+        // no llamar a super -> evita que disminuya durabilidad vanilla
         return true;
     }
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         return true; // no durabilidad por hits
+    }
+
+    /* =======================
+       USE ON BLOCK (arar / path) -> aquí se hace el consumo de energía para el path
+       ======================= */
+    @Override
+    public ActionResult useOnBlock(ItemUsageContext context) {
+        World world = context.getWorld();
+        // cliente: dejar que super haga efectos visuales; servidor aplica lógica
+        if (world.isClient) {
+            return super.useOnBlock(context);
+        }
+
+        PlayerEntity player = context.getPlayer();
+        ItemStack stack = context.getStack();
+        BlockPos pos = context.getBlockPos();
+        BlockState pre = world.getBlockState(pos);
+
+        // criterio vanilla-like: solo consumir si no es aire y hardness > 0
+        boolean shouldCountAndConsume = !pre.isAir() && pre.getHardness(world, pos) > 0.0F;
+
+        // init seguro
+        ensureComponentsInitialized(stack);
+
+        int energy = ItemInit.ModDataComponents.getEnergy(stack);
+        int mined  = ItemInit.ModDataComponents.getMined(stack);
+        int ocLeft = ItemInit.ModDataComponents.getOverclockLeft(stack);
+
+        // if player not creative and no energy/oc -> block action
+        if (player != null && !player.getAbilities().creativeMode && energy <= 0 && ocLeft <= 0) {
+            if (player instanceof ServerPlayerEntity sp) {
+                sp.sendMessage(Text.translatable("text.neonix.no_energy"), true);
+            }
+            return ActionResult.PASS;
+        }
+
+        // Ejecutar la acción vanilla (cambia bloque a path etc.)
+        ActionResult res = super.useOnBlock(context);
+
+        // >>> CORRECCIÓN: aceptar como "acción exitosa" cualquier resultado que no sea PASS/FAIL
+        if (res != ActionResult.PASS && res != ActionResult.FAIL && shouldCountAndConsume) {
+            if (ocLeft > 0) {
+                ocLeft = Math.max(0, ocLeft - 1);
+            } else {
+                if (energy > 0) energy = Math.max(0, energy - COST_PER_BLOCK);
+                mined += 1;
+                if (mined >= TRIGGER_BLOCKS && player instanceof ServerPlayerEntity sp) {
+                    mined = 0;
+                    ocLeft = OC_FREE_BLOCKS;
+                    sp.sendMessage(Text.translatable("text.neonix.overclock_on", OC_FREE_BLOCKS), true);
+                }
+            }
+
+            ItemInit.ModDataComponents.setEnergy(stack, energy);
+            ItemInit.ModDataComponents.setMined(stack, mined);
+            ItemInit.ModDataComponents.setOverclockLeft(stack, ocLeft);
+        }
+
+        // Forzar que no quede daño en el stack (evita durabilidad vanilla)
+        if (!stack.isEmpty()) {
+            stack.setDamage(0);
+        }
+
+        return res;
     }
 
     /* =======================
@@ -111,7 +192,6 @@ public class HoloShovelItem extends ShovelItem {
         ItemStack stack = user.getStackInHand(hand);
         if (world.isClient) return TypedActionResult.pass(stack);
 
-        // Si ya está lleno no consumas nada
         if (ItemInit.ModDataComponents.getEnergy(stack) >= CAPACITY) {
             if (user instanceof ServerPlayerEntity sp) {
                 sp.sendMessage(Text.translatable("text.neonix.energy_max", CAPACITY), true);
@@ -156,13 +236,11 @@ public class HoloShovelItem extends ShovelItem {
     }
 
     private boolean consumeOne(PlayerEntity player, Item item) {
-        // 1) offhand
         ItemStack off = player.getOffHandStack();
         if (!off.isEmpty() && off.isOf(item)) {
             off.decrement(1);
             return true;
         }
-        // 2) inventario (incluye hotbar)
         var inv = player.getInventory();
         for (int i = 0; i < inv.size(); i++) {
             ItemStack s = inv.getStack(i);
@@ -175,7 +253,7 @@ public class HoloShovelItem extends ShovelItem {
     }
 
     /* =======================
-       BARRA DEL ÍTEM = ENERGÍA
+       BARRA DEL ITEM = ENERGÍA
        ======================= */
     @Override public boolean isItemBarVisible(ItemStack stack) { return true; }
 
@@ -193,4 +271,3 @@ public class HoloShovelItem extends ShovelItem {
     @Override public boolean isEnchantable(ItemStack stack) { return stack.getCount() == 1; }
     @Override public int getEnchantability() { return 10; }
 }
-

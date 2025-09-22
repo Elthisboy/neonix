@@ -17,17 +17,17 @@ import net.minecraft.world.World;
 
 public class HoloPickaxeItem extends PickaxeItem {
     // Config final
-    private static final int CAPACITY = 1000;          // energía máx
+    private static final int CAPACITY = 1200;          // energía máx
     private static final int COST_PER_BLOCK = 1;       // consumo por bloque
     private static final int TRIGGER_BLOCKS = 500;     // cada 500 -> overclock
     private static final int OC_FREE_BLOCKS = 50;      // bloques “gratis” sin gasto
-    private static final float OC_SPEED_MULT = 5.0f;   // multiplicador durante OC
+    private static final float OC_SPEED_MULT = 6.0f;   // multiplicador durante OC
     private static final int BAR_COLOR = 0x00E5FF;     // cian
 
     // Recargas por charge
     private static final int RECHARGE_LV1 = 50;
-    private static final int RECHARGE_LV2 = 100;
-    private static final int RECHARGE_LV3 = 200;
+    private static final int RECHARGE_LV2 = 125;
+    private static final int RECHARGE_LV3 = 250;
 
     public HoloPickaxeItem(ToolMaterial material, Settings settings) {
         super(material, settings.maxCount(1)); // sin durabilidad vanilla

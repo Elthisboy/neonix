@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:redstone_block"
+    },
+    "C": {
+      "item": "neonix:holo_charge_lv1"
+    }
+  },
+  "pattern": [
+    "C C",
+    " B ",
+    "C C"
+  ],
+  "result": {
+    "count": 1,
+    "id": "neonix:holo_charge_lv2"
+  }
+}

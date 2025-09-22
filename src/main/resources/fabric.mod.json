@@ -2,14 +2,15 @@
 	"schemaVersion": 1,
 	"id": "neonix",
 	"version": "${version}",
-	"name": "Neo-Nix: HoloTools & CyberCapsule",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"name": "Neo-Nix: HoloTools",
+	"description": "Energy-powered Holo tools that replace durability with a rechargeable battery. Mine, chop, dig, and farm using Holo-Charge items; unlock Overclock bursts for speed and free actions.",
 	"authors": [
-		"Me!"
+		"El_this_boy (code)",
+		"Anto_niapaz (art)"
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": ""
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/neonix/icon.png",

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "A": {
+      "item": "minecraft:diamond_axe"
+    },
+    "C": {
+      "item": "neonix:holo_charge_lv2"
+    }
+  },
+  "pattern": [
+    "AC ",
+    "A  ",
+    " C "
+  ],
+  "result": {
+    "count": 1,
+    "id": "neonix:holo_axe"
+  }
+}

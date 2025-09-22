@@ -2,6 +2,7 @@ package com.elthisboy.neonix.holosword;
 
 import com.elthisboy.neonix.init.ItemInit;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
@@ -18,27 +19,48 @@ import net.minecraft.world.World;
 
 public class HoloSwordItem extends SwordItem {
     // Config
-    private static final int CAPACITY = 600;          // energía máx
+    private static final int CAPACITY = 1000;          // energía máx
     private static final int COST_PER_HIT = 2;        // gasto por golpe
     private static final int TRIGGER_HITS = 300;      // cada 300 hits → overclock
     private static final int OC_FREE_HITS = 40;       // hits gratis en OC
-    private static final float OC_DAMAGE_MULT = 2.0f; // daño x2 en OC (se aplica manualmente)
+    private static final float OC_DAMAGE_MULT = 2.5f; // daño x2.5 en OC
     private static final int BAR_COLOR = 0xFF004C;    // color barra
+
+    // “Sensación” de espada de diamante sin tocar atributos del item:
+    private static final float DIAMOND_BASE_DAMAGE = 8.0f;
+    private static final int   DIAMOND_COOLDOWN_TICKS = 12; // ~0.6s aprox
 
     // Recargas por charge
     private static final int RECHARGE_LV1 = 50;
-    private static final int RECHARGE_LV2 = 100;
-    private static final int RECHARGE_LV3 = 200;
+    private static final int RECHARGE_LV2 = 125;
+    private static final int RECHARGE_LV3 = 250;
 
     public HoloSwordItem(ToolMaterial material, Settings settings) {
         super(material, settings.maxCount(1));
     }
-    
+
+    /* =======================
+       INIT DEFENSIVO (0 energía)
+       ======================= */
+    @Override
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (!world.isClient) {
+            if (!stack.contains(ItemInit.ModDataComponents.ENERGY))         ItemInit.ModDataComponents.setEnergy(stack, 0);
+            if (!stack.contains(ItemInit.ModDataComponents.MINED_COUNT))    ItemInit.ModDataComponents.setMined(stack, 0);
+            if (!stack.contains(ItemInit.ModDataComponents.OVERCLOCK_LEFT)) ItemInit.ModDataComponents.setOverclockLeft(stack, 0);
+        }
+        super.inventoryTick(stack, world, entity, slot, selected);
+    }
+
+    /* =======================
+       COMBATE / ENERGÍA / DAÑO
+       ======================= */
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        // No llamamos a super => sin durabilidad vanilla
         if (!attacker.getWorld().isClient) {
-            // inicialización defensiva del componente en stacks viejos
-            if (!stack.contains(ItemInit.ModDataComponents.ENERGY))         ItemInit.ModDataComponents.setEnergy(stack, CAPACITY);
+            // Asegurar componentes (iniciales = 0)
+            if (!stack.contains(ItemInit.ModDataComponents.ENERGY))         ItemInit.ModDataComponents.setEnergy(stack, 0);
             if (!stack.contains(ItemInit.ModDataComponents.MINED_COUNT))    ItemInit.ModDataComponents.setMined(stack, 0);
             if (!stack.contains(ItemInit.ModDataComponents.OVERCLOCK_LEFT)) ItemInit.ModDataComponents.setOverclockLeft(stack, 0);
 
@@ -46,55 +68,66 @@ public class HoloSwordItem extends SwordItem {
             int hits   = ItemInit.ModDataComponents.getMined(stack);
             int ocLeft = ItemInit.ModDataComponents.getOverclockLeft(stack);
 
-            if (ocLeft > 0) {
-                // Overclock: consumir hit gratis y aplicar daño extra
-                ocLeft = Math.max(0, ocLeft - 1);
+            // Cooldown “como espada”
+            if (attacker instanceof PlayerEntity p) {
+                p.getItemCooldownManager().set(this, DIAMOND_COOLDOWN_TICKS);
+            }
 
-                if (attacker instanceof PlayerEntity p) {
-                    // calculamos daño extra a partir del atributo base de ataque del jugador
-                    double baseDamage = p.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);
-                    float extra = (float) (baseDamage * (OC_DAMAGE_MULT - 1.0f));
-                    if (extra > 0f) {
-                        target.damage(p.getDamageSources().playerAttack((PlayerEntity) attacker), extra);
-                    }
-                }
+            // Determinar daño deseado para este golpe
+            float desiredDamage;
+            if (ocLeft > 0) {
+                // Overclock: no gasta energía y daño multiplicado
+                ocLeft = Math.max(0, ocLeft - 1);
+                desiredDamage = DIAMOND_BASE_DAMAGE * OC_DAMAGE_MULT;
+                // No sumar progreso durante OC
             } else {
-                // Sin OC: gastar energía y contar golpes para overclock
-                if (energy > 0) energy = Math.max(0, energy - COST_PER_HIT);
-                hits += 1;
-                if (hits >= TRIGGER_HITS && attacker instanceof PlayerEntity p) {
-                    hits = 0;
-                    ocLeft = OC_FREE_HITS;
-                    if (p instanceof ServerPlayerEntity sp) {
-                        // text.neonix.overclock_on: "%s free hits"
-                        sp.sendMessage(Text.translatable("text.neonix.overclock_on", OC_FREE_HITS), true);
+                if (energy > 0) {
+                    energy = Math.max(0, energy - COST_PER_HIT);
+                    hits += 1;
+                    desiredDamage = DIAMOND_BASE_DAMAGE;
+
+                    // activar OC si corresponde
+                    if (hits >= TRIGGER_HITS && attacker instanceof PlayerEntity p) {
+                        hits = 0;
+                        ocLeft = OC_FREE_HITS;
+                        if (p instanceof ServerPlayerEntity sp) {
+                            sp.sendMessage(Text.translatable("text.neonix.overclock_on", OC_FREE_HITS), true);
+                        }
                     }
+                } else {
+                    // Sin energía y sin OC: no forzamos daño extra (golpe “flojo”)
+                    desiredDamage = 0f;
                 }
             }
 
-            // guardar estado
+            // Aplicar daño extra para alcanzar el daño “de diamante” (o su versión OC)
+            if (desiredDamage > 0f && attacker instanceof PlayerEntity p) {
+                double baseNow = p.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+                float extra = Math.max(0f, desiredDamage - (float) baseNow);
+                if (extra > 0f) {
+                    target.damage(p.getDamageSources().playerAttack(p), extra);
+                }
+            }
+
+            // Guardar estado
             ItemInit.ModDataComponents.setEnergy(stack, energy);
-            ItemInit.ModDataComponents.setMined(stack, hits);
+            ItemInit.ModDataComponents.setMined(stack,  hits);
             ItemInit.ModDataComponents.setOverclockLeft(stack, ocLeft);
         }
-
-        // IMPORTANTÍSIMO: devolvemos true y NO llamamos a super.postHit(...)
-        // Eso evita que Minecraft aplique daño de durabilidad vanilla.
         return true;
     }
 
-    /**
-     * Para cualquier uso de la espada en minado (p. ej. romper webs), también
-     * evitamos llamar a super.postMine para que no se aplique durabilidad.
+    /*
+      Evitar durabilidad por romper bloques (telarañas, etc).
      */
     @Override
-    public boolean postMine(ItemStack stack, World world, net.minecraft.block.BlockState state, net.minecraft.util.math.BlockPos pos, LivingEntity miner) {
-        // No hacemos lógica compleja aquí — simplemente evitar la durabilidad.
+    public boolean postMine(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner) {
+        // No llamamos a super => sin daño de durabilidad
         return true;
     }
 
     /* =======================
-       RECARGA CON HOLO_CHARGE (Shift + Right click)
+       RECARGA (Shift + Click derecho)
        ======================= */
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
@@ -145,11 +178,13 @@ public class HoloSwordItem extends SwordItem {
     }
 
     private boolean consumeOne(PlayerEntity player, Item item) {
+        // 1) offhand
         ItemStack off = player.getOffHandStack();
         if (!off.isEmpty() && off.isOf(item)) {
             off.decrement(1);
             return true;
         }
+        // 2) inventario
         var inv = player.getInventory();
         for (int i = 0; i < inv.size(); i++) {
             ItemStack s = inv.getStack(i);
@@ -162,7 +197,7 @@ public class HoloSwordItem extends SwordItem {
     }
 
     /* =======================
-       BARRA DEL ÍTEM = ENERGÍA
+       BARRA / ENCANTABLE
        ======================= */
     @Override public boolean isItemBarVisible(ItemStack stack) { return true; }
 
@@ -174,9 +209,6 @@ public class HoloSwordItem extends SwordItem {
 
     @Override public int getItemBarColor(ItemStack stack) { return BAR_COLOR; }
 
-    /* =======================
-       ENCANTABLE
-       ======================= */
     @Override public boolean isEnchantable(ItemStack stack) { return stack.getCount() == 1; }
-    @Override public int getEnchantability() { return 12; } // parecido a diamante
+    @Override public int getEnchantability() { return 12; } // cercano a diamante
 }

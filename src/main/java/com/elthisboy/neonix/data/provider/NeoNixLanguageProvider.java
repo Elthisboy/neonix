@@ -51,15 +51,31 @@ public class NeoNixLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add("message.neonix.holoshovel.overclock", "§bOVERCLOCK activated: §e%s §fblocks free!");
 
         translationBuilder.add(ItemInit.HOLO_SWORD,"Holo-Sword");
-        translationBuilder.add("message.neonix.holosword.overclock", "§cOVERCLOCK activado: %s golpes gratis!");
-        translationBuilder.add("message.neonix.holosword.full", "Energía al máximo (%s).");
-        translationBuilder.add("message.neonix.holosword.recharge", "Recarga +%s → Energía: %s/%s");
-        translationBuilder.add("message.neonix.holosword.nocharge", "No tienes HOLO_CHARGE para recargar.");
+        translationBuilder.add("message.neonix.holosword.overclock", "§cOVERCLOCK activated: %s Hits free!");
+        translationBuilder.add("message.neonix.holosword.full", "Energy is already full (%s).");
+        translationBuilder.add("message.neonix.holosword.recharge", "Recharged +%s → Energy: %s/%s");
+        translationBuilder.add("message.neonix.holosword.nocharge", "You have no HOLO_CHARGE to recharge.");
 
         //.................................................ITEMS................................................
         translationBuilder.add(ItemInit.HOLO_CHARGE_LV1,"Holo-Charge lv1");
         translationBuilder.add(ItemInit.HOLO_CHARGE_LV2,"Holo-Charge lv2");
         translationBuilder.add(ItemInit.HOLO_CHARGE_LV3,"Holo-Charge lv3");
+
+
+        translationBuilder.add("lore.neonix.charge", "Holo-Charge");
+        translationBuilder.add("lore.neonix.charge.lv1", "+50 Energy");
+        translationBuilder.add("lore.neonix.charge.lv2", "+125 Energy");
+        translationBuilder.add("lore.neonix.charge.lv3", "+250 Energy");
+
+        translationBuilder.add("lore.neonix.holo", "Holo Technology");
+        translationBuilder.add("lore.neonix.energy_based", "Uses energy instead of durability.");
+
+        translationBuilder.add("lore.neonix.sword_hint", "Hits harder during Overclock.");
+        translationBuilder.add("lore.neonix.axe_hint", "Chops faster during Overclock.");
+        translationBuilder.add("lore.neonix.shovel_hint", "Creates paths and digs; uses energy.");
+        translationBuilder.add("lore.neonix.hoe_hint", "Tills soil; uses energy. Overclock boosts speed.");
+
+
 
     }
 }
