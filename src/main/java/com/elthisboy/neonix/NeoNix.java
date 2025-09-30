@@ -21,7 +21,7 @@ public class NeoNix implements ModInitializer {
 
 
 
-		LOGGER.info("Hello Fabric world!");
+		LOGGER.info("Load!");
 	}
 
 	public static Identifier id(String path){

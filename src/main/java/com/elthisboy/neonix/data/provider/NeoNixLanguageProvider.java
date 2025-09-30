@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class NeoNixLanguageProvider extends FabricLanguageProvider {
     public NeoNixLanguageProvider(FabricDataOutput dataOutput, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
-        super(dataOutput, registryLookup);
+        super(dataOutput, "en_us", registryLookup);
     }
 
     private static void addText(@NotNull TranslationBuilder builder, @NotNull Text text, @NotNull String value){
